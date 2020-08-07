@@ -97,7 +97,12 @@ public class VendingMachine {
 
     public Item buy(String code) {
         if (!itemSlots.containsKey(code)) {
-            this.message = "Invalid code entered. Please try again.";
+            this.message = "Invalid code entered. Please make another selection.";
+            return null;
+        }
+        if (itemSlots.get(code).getItems().size() == 0) {
+            this.message = "Sold Out! Please make another selection.";
+            return null;
         }
 
         return new Item("null", 100);

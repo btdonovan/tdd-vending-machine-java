@@ -111,8 +111,14 @@ public class VendingMachineTest {
         VendingMachine vendingMachine = new VendingMachine();
         vendingMachine.addSlot(new ItemSlot(100, 15));
         vendingMachine.buy("a2");
-        assertEquals("Invalid code entered. Please try again.", vendingMachine.getMessage());
+        assertEquals("Invalid code entered. Please make another selection.", vendingMachine.getMessage());
     }
 
-
+    @Test
+    public void CustomerIsNotifiedIfTheySelectASoldOutItem() {
+        VendingMachine vendingMachine = new VendingMachine();
+        vendingMachine.addSlot(new ItemSlot(100, 15));
+        vendingMachine.buy("a1");
+        assertEquals("Sold Out! Please make another selection.", vendingMachine.getMessage());
+    }
 }
