@@ -32,4 +32,12 @@ public class Item {
     public int hashCode() {
         return Objects.hash(getItemName(), getValue());
     }
+
+    @Override
+    public String toString() {
+        return "Item{" +
+                "itemName='" + itemName + '\'' +
+                ", value=" + value +
+                '}';
+    }
 }

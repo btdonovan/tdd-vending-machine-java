@@ -90,6 +90,14 @@ public class VendingMachineTest {
     }
 
     @Test
+    public void CustomerCanDepositMoney() {
+        VendingMachine vendingMachine = new VendingMachine();
+        vendingMachine.pay(200);
+        int expected = 200;
+        assertEquals(expected, vendingMachine.getCustomerBalance());
+    }
+
+    @Test
     public void CustomerCanSeeHowMuchTheyHaveDeposited() {
         VendingMachine vendingMachine = new VendingMachine();
         vendingMachine.pay(200);
@@ -97,4 +105,14 @@ public class VendingMachineTest {
         String actual = vendingMachine.seeCustomerBalance();
         assertEquals(expected, actual);
     }
+
+    @Test
+    public void CustomerIsNotifiedIfTheyEnterANonExistentCode() {
+        VendingMachine vendingMachine = new VendingMachine();
+        vendingMachine.addSlot(new ItemSlot(100, 15));
+        vendingMachine.buy("a2");
+        assertEquals("Invalid code entered. Please try again.", vendingMachine.getMessage());
+    }
+
+
 }

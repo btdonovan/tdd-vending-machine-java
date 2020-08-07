@@ -10,6 +10,7 @@ public class VendingMachine {
     private HashMap<String, ItemSlot> itemSlots = new HashMap<>();
     private int machineBalance = 0;
     private int customerBalance = 0;
+    private String message;
 
 
     public HashMap<String, ItemSlot> getItemSlots() {
@@ -19,19 +20,19 @@ public class VendingMachine {
     public int stockItem(Item item, int qty, boolean overflow) {
         int left = qty;
         // Find an empty slot with the same value or a slot with the same items. If items left and overflow, find next slot
-        System.out.println(itemSlots.keySet());
         for (String key : itemSlots.keySet()) {
-            System.out.println(key);
             if ((itemSlots.get(key).getPrice() == item.getValue()) && ((itemSlots.get(key).getItems().size() == 0) || (itemSlots.get(key).getItems().get(0) == item))) {
-                System.out.println(key + " can be loaded");
                 left = itemSlots.get(key).addItem(item, left);
                 if (!overflow) {
                     break;
                 }
-                System.out.println("loaded " + key + " with " + item.getItemName());
             }
         }
         return qty - left;
+    }
+
+    public String getMessage() {
+        return message;
     }
 
     public int getMachineBalance() {
@@ -77,6 +78,10 @@ public class VendingMachine {
         return result;
     }
 
+    public int getCustomerBalance() {
+        return customerBalance;
+    }
+
     public void pay(int cents) {
         customerBalance += cents;
     }
@@ -87,5 +92,14 @@ public class VendingMachine {
         String result = NumberFormat.getCurrencyInstance().format(dollars);
 
         return result;
+    }
+
+
+    public Item buy(String code) {
+        if (!itemSlots.containsKey(code)) {
+            this.message = "Invalid code entered. Please try again.";
+        }
+
+        return new Item("null", 100);
     }
 }

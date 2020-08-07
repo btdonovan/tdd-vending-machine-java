@@ -38,4 +38,11 @@ public class ItemTest {
         assertEquals(item1.hashCode(), item2.hashCode());
     }
 
+    @Test
+    public void StringRepresentation() {
+        Item item = new Item("SunChips", 100);
+        String expected = "Item{itemName='SunChips', value=100}";
+        assertEquals(expected, item.toString());
+    }
+
 }
