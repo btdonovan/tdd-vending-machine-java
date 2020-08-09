@@ -11,6 +11,7 @@ public class VendingMachine {
     private int machineBalance = 0;
     private int customerBalance = 0;
     private String message;
+    private int changeBalance = 10000;
 
 
     public HashMap<String, ItemSlot> getItemSlots() {
@@ -29,6 +30,14 @@ public class VendingMachine {
             }
         }
         return qty - left;
+    }
+
+    public int getChangeBalance() {
+        return changeBalance;
+    }
+
+    public void setChangeBalance(int changeBalance) {
+        this.changeBalance = changeBalance;
     }
 
     public String getMessage() {
@@ -95,7 +104,7 @@ public class VendingMachine {
     }
 
 
-    public Item buy(String code) {
+    public Delivery buy(String code) {
         if (!itemSlots.containsKey(code)) {
             this.message = "Invalid code entered. Please make another selection.";
             return null;
@@ -104,7 +113,33 @@ public class VendingMachine {
             this.message = "Sold Out! Please make another selection.";
             return null;
         }
+        if (itemSlots.get(code).getPrice() > customerBalance) {
+            double deficit = itemSlots.get(code).getPrice() - customerBalance;
+            double dollars = deficit / 100;
+            String remaining = NumberFormat.getCurrencyInstance().format(dollars);
+            this.message = "Please deposit an additional " + remaining;
+            return null;
+        }
+        if ((customerBalance - itemSlots.get(code).getPrice()) > changeBalance) {
+            this.message = "Insufficient Coins Available To Make Proper Change. Cancel or choose another item.";
+            return null;
+        }
+        ItemSlot slot = itemSlots.get(code);
+        int change = customerBalance - slot.getPrice();
+        changeBalance -= change;
+        machineBalance += customerBalance;
+        customerBalance = 0;
+        if (change > 0) {
+            this.message = "Please collect your item and change.";
+        } else {
+            this.message = "Please collect your item.";
+        }
+        return new Delivery(slot.getItems().pop(), change);
+    }
 
-        return new Item("null", 100);
+    public Delivery cancel() {
+        int change = customerBalance;
+        customerBalance = 0;
+        return new Delivery(null, change);
     }
 }

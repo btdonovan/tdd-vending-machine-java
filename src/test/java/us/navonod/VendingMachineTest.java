@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 public class VendingMachineTest {
 
@@ -120,5 +121,104 @@ public class VendingMachineTest {
         vendingMachine.addSlot(new ItemSlot(100, 15));
         vendingMachine.buy("a1");
         assertEquals("Sold Out! Please make another selection.", vendingMachine.getMessage());
+    }
+
+    @Test
+    public void CustomerIsNotifiedIfTheySelectAnItemThatCostsMoreThanTheyHavePaid() {
+        VendingMachine vendingMachine = new VendingMachine();
+        vendingMachine.addSlot(new ItemSlot(100, 15));
+        vendingMachine.stockItem(new Item("SunChips", 100), 4, false);
+        vendingMachine.pay(75);
+        vendingMachine.buy("a1");
+        assertEquals("Please deposit an additional $0.25", vendingMachine.getMessage());
+    }
+
+    @Test
+    public void CustomerReceivesItemAndAnyChangeWhenSelectingAnItemTheyHaveDepositedEnoughFor() {
+        VendingMachine vendingMachine = new VendingMachine();
+        vendingMachine.addSlot(new ItemSlot(75, 15));
+        vendingMachine.stockItem(new Item("Sunchips", 75), 4, false);
+        vendingMachine.pay(100);
+        Delivery expected = new Delivery(new Item("Sunchips", 75), 25);
+        Delivery actual = vendingMachine.buy("a1");
+        assertEquals(expected.getChange(), actual.getChange());
+        assertEquals(expected.getItem(), actual.getItem());
+    }
+
+    @Test
+    public void CustomerCanCancelAndReceiveTheirDepositBack() {
+        VendingMachine vendingMachine = new VendingMachine();
+        vendingMachine.pay(100);
+        Delivery expected = new Delivery(null, 100);
+        Delivery actual = vendingMachine.cancel();
+        assertEquals(expected.getChange(), actual.getChange());
+        assertNull(actual.getItem());
+    }
+
+    @Test
+    public void WhenItemIsPurchasedAvailableStockDecreases() {
+        VendingMachine vendingMachine = new VendingMachine();
+        vendingMachine.addSlot(new ItemSlot(75, 15));
+        vendingMachine.stockItem(new Item("Sunchips", 75), 4, false);
+        assertEquals(4, vendingMachine.getItemSlots().get("a1").getItems().size());
+        vendingMachine.pay(100);
+        vendingMachine.buy("a1");
+        assertEquals(3, vendingMachine.getItemSlots().get("a1").getItems().size());
+    }
+
+    @Test
+    public void WhenACustomerReceivesChangeTheCustomerDepositIsZero() {
+        VendingMachine vendingMachine = new VendingMachine();
+        vendingMachine.addSlot(new ItemSlot(75, 15));
+        vendingMachine.stockItem(new Item("Sunchips", 75), 4, false);
+        vendingMachine.pay(100);
+        assertEquals(100, vendingMachine.getCustomerBalance());
+        vendingMachine.buy("a1");
+        assertEquals(0, vendingMachine.getCustomerBalance());
+    }
+
+    @Test
+    public void MachineBalancesReflectCompletedPurchases() {
+        VendingMachine vendingMachine = new VendingMachine();
+        vendingMachine.setChangeBalance(1000);
+        vendingMachine.setMachineBalance(1000);
+        vendingMachine.addSlot(new ItemSlot(75, 15));
+        vendingMachine.stockItem(new Item("Sunchips", 75), 4, false);
+        vendingMachine.pay(100);
+        Delivery delivery = vendingMachine.buy("a1");
+        assertEquals(1100, vendingMachine.getMachineBalance());
+        assertEquals(975, vendingMachine.getChangeBalance());
+        assertEquals(2075, vendingMachine.getChangeBalance() + vendingMachine.getMachineBalance());
+    }
+
+    @Test
+    public void CanSetMachineChangeBalance() {
+        VendingMachine vendingMachine = new VendingMachine();
+        vendingMachine.setChangeBalance(25);
+        assertEquals(25, vendingMachine.getChangeBalance());
+    }
+
+
+    @Test
+    public void CustomerCanSeeIfMachineCanMakeChange() {
+        VendingMachine vendingMachine = new VendingMachine();
+        vendingMachine.setChangeBalance(20);
+        vendingMachine.addSlot(new ItemSlot(75, 15));
+        vendingMachine.stockItem(new Item("Sunchips", 75), 4, false);
+        vendingMachine.pay(100);
+        vendingMachine.buy("a1");
+        String expected = "Insufficient Coins Available To Make Proper Change. Cancel or choose another item.";
+        assertEquals(expected, vendingMachine.getMessage());
+    }
+
+    @Test
+    public void CustomerIsNotNotifiedToCollectChangeIfTheyDepositExactItemCost() {
+        VendingMachine vendingMachine = new VendingMachine();
+        vendingMachine.addSlot(new ItemSlot(75, 15));
+        vendingMachine.stockItem(new Item("Sunchips", 75), 4, false);
+        vendingMachine.pay(75);
+        vendingMachine.buy("a1");
+        String expected = "Please collect your item.";
+        assertEquals(expected, vendingMachine.getMessage());
     }
 }
